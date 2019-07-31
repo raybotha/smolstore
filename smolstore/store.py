@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from .table import Table
-from threading import Lock
 import pickle
 from copy import deepcopy
+from threading import Lock
+
+from .table import Table
 
 
 class SmolStore:
