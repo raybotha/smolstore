@@ -1,0 +1,72 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.2.3  # Use the ref you want to point at
+    hooks:
+      - id: check-added-large-files
+        name: Check for added large files
+        description: Prevent giant files from being committed
+        entry: check-added-large-files
+        language: python
+      - id: check-ast
+        name: Check python ast
+        description: Simply check whether the files parse as valid python.
+        entry: check-ast
+        language: python
+        types: [python]
+      - id: check-case-conflict
+        name: Check for case conflicts
+        description: Check for files that would conflict in case-insensitive filesystems
+        entry: check-case-conflict
+        language: python
+      - id: check-docstring-first
+        name: Check docstring is first
+        description: Checks a common error of defining a docstring after code.
+        entry: check-docstring-first
+        language: python
+        types: [python]
+      - id: pretty-format-json
+        name: Pretty format JSON
+        description: This hook sets a standard for formatting JSON files.
+        entry: pretty-format-json
+        language: python
+        types: [json]
+      - id: check-vcs-permalinks
+        name: Check vcs permalinks
+        description: Ensures that links to vcs websites are permalinks.
+        entry: check-vcs-permalinks
+        language: python
+        types: [text]
+      - id: end-of-file-fixer
+        name: Fix End of Files
+        description: Ensures that a file is either empty, or ends with one newline.
+        entry: end-of-file-fixer
+        language: python
+        types: [text]
+      - id: forbid-new-submodules
+        name: Forbid new submodules
+        language: python
+        entry: forbid-new-submodules
+        description: Prevent addition of new git submodules
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+        description: This hook trims trailing whitespace.
+        entry: trailing-whitespace-fixer
+        language: python
+        types: [text]
+        stages: [commit, push, manual]
+      - id: fix-encoding-pragma
+        name: Fix python encoding pragma
+        language: python
+        entry: fix-encoding-pragma
+        description: 'Add # -*- coding: utf-8 -*- to the top of python files'
+        types: [python]
+  - repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+      - id: black
+        python_version: python3.7
+  - repo: https://github.com/asottile/blacken-docs
+    rev: v1.2.0
+    hooks:
+      - id: blacken-docs
+        additional_dependencies: [black]
