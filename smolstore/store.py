@@ -41,7 +41,7 @@ class SmolStore:
             self._tables[table_name] = table
             return table
 
-    def commit(self):
+    def save(self):
         with self._persistence_lock:
             self._persistent_store = deepcopy(self._tables)
             if self._filename:
