@@ -35,7 +35,7 @@ class SmolStore:
         if table_name in self._tables:
             return self._tables[table_name]
         else:
-            store = Table(self._persistence_lock)
+            store = Table()
             self._tables[table_name] = store
             return store
 

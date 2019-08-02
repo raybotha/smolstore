@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
-from collections.abc import MutableMapping
+from typing import Iterable, MutableMapping, Mapping
+from .field import Field
 
 
-class Document(MutableMapping):
-    def __init__(self, *args, **kwargs):
-        self.data = {}
-        self.update(*args, **kwargs)
-
-    def __setitem__(self, key, value):
-        self.data[key] = value
+class Fields(Mapping):
+    def __init__(self, _fields: Iterable[Field] = None, _import: MutableMapping = None):
+        pass
 
     def __getitem__(self, key):
         return self.data[key]
-
-    def __delitem__(self, key):
-        del self.data[key]
 
     def __iter__(self):
         return self.data.__iter__()
