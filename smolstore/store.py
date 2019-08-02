@@ -2,7 +2,9 @@
 import pickle
 from copy import deepcopy
 from threading import Lock
+from typing import Iterable
 
+from .field import Field
 from .table import Table
 
 
@@ -31,13 +33,13 @@ class SmolStore:
             self._tables = {}
         self._persistent_store = deepcopy(self._tables)
 
-    def table(self, table_name="_default"):
+    def table(self, table_name="_default", fields: Iterable[Field] = None):
         if table_name in self._tables:
             return self._tables[table_name]
         else:
-            store = Table()
-            self._tables[table_name] = store
-            return store
+            table = Table(_lock=self._persistence_lock, _fields=fields)
+            self._tables[table_name] = table
+            return table
 
     def commit(self):
         with self._persistence_lock:
