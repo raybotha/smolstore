@@ -1,49 +1,45 @@
 # -*- coding: utf-8 -*-
-import pickle
-from copy import deepcopy
-from threading import Lock
 from typing import Iterable
+from typing import MutableMapping
 
 from .field import Field
+from .serializers import JsonSerializer
 from .table import Table
 
 
 class SmolStore:
-    def __init__(self, filename=None):
-        self._persistent_store = {}
-        self._persistence_lock = Lock()
+    def __init__(self, filename=None, serializer=JsonSerializer):
         self._filename = filename
+        self._serializer = serializer
         if filename:
             self._load_from_file()
         else:
             self._tables = {}
 
-    def rollback(self):
-        self._load_from_memory()
-
-    def _load_from_memory(self):
-        with self._persistence_lock:
-            self._tables = deepcopy(self._persistent_store)
-
     def _load_from_file(self):
         try:
-            with open(self._filename, "rb") as file:
-                self._tables = pickle.load(file)
+            self._deserialize(self._serializer.load(self._filename))
         except FileNotFoundError:
             self._tables = {}
-        self._persistent_store = deepcopy(self._tables)
+
+    def _deserialize(self, _data: MutableMapping):
+        self._tables = {
+            table_name: Table._deserialize(table) for table_name, table in _data.items()
+        }
+
+    def _serialize(self) -> dict:
+        return {
+            table_name: table._serialize() for table_name, table in self._tables.items()
+        }
 
     def table(self, table_name="_default", fields: Iterable[Field] = None):
         if table_name in self._tables:
             return self._tables[table_name]
         else:
-            table = Table(_lock=self._persistence_lock, _fields=fields)
+            table = Table(_fields=fields)
             self._tables[table_name] = table
             return table
 
     def save(self):
-        with self._persistence_lock:
-            self._persistent_store = deepcopy(self._tables)
-            if self._filename:
-                with open(self._filename, "wb") as file:
-                    pickle.dump(self._persistent_store, file)
+        if self._filename:
+            self._serializer.dump(self._filename, self._serialize())
