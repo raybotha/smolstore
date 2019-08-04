@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 
+from .document import Document
 from .query import ComparisonType
 from .query import Query
 
@@ -22,6 +23,14 @@ class Field:
 
     def _serialize(self) -> dict:
         return {"field_name": self.name, "index": self.indexed, "unique": self.unique}
+
+    def _add_value(self, document_key, value):
+        hash_value = hash(value)
+        self._hash_index[hash_value].add(document_key)
+
+    def _remove_value(self, document_key, value):
+        hash_value = hash(value)
+        self._hash_index[hash_value].remove(document_key)
 
     def _get_keys(self, comparison_type: ComparisonType, value):
         if comparison_type == ComparisonType.EQUAL:
