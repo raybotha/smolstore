@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
+
+from .query import ComparisonType
+from .query import Query
 
 
 class Field:
@@ -6,17 +10,31 @@ class Field:
         if unique:
             index = True
         self.name = field_name
-        self.index = index
+        self.indexed = index
         self.unique = unique
+
+        self._hash_index = defaultdict(lambda: set())
 
     @classmethod
     def _deserialize(cls, _data):
-        field = cls.__new__(cls)
-        field.__dict__ = _data
+        field = cls(**_data)
         return field
 
     def _serialize(self) -> dict:
-        return self.__dict__
+        return {"field_name": self.name, "index": self.indexed, "unique": self.unique}
+
+    def _get_keys(self, comparison_type: ComparisonType, value):
+        if comparison_type == ComparisonType.EQUAL:
+            hash_value = hash(value)
+            return self._hash_index[hash_value]
+        else:
+            raise NotImplementedError
+
+    def __eq__(self, other):
+        return Query(field=self, comparison_type=ComparisonType.EQUAL, value=other)
+
+    def __ne__(self, other):
+        return Query(field=self, comparison_type=ComparisonType.NOT_EQUAL, value=other)
 
     def __repr__(self):
-        return "Field(%s, index=%s, unique=%s)" % (self.name, self.index, self.unique)
+        return "Field(%s, index=%s, unique=%s)" % (self.name, self.indexed, self.unique)

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from typing import Iterable
-from typing import Mapping
 from typing import MutableMapping
 
 from .field import Field
 
 
-class Fields(Mapping):
+class Fields(MutableMapping):
     def __init__(self, _fields: Iterable[Field] = None):
         if not _fields:
             _fields = {}
@@ -23,8 +22,14 @@ class Fields(Mapping):
     def _serialize(self) -> dict:
         return {field_name: field._serialize() for field_name, field in self.__dict__}
 
+    def __setitem__(self, key, value):
+        self.__dict__.__setitem__(key, value)
+
+    def __delitem__(self, key):
+        self.__dict__.__delitem__(key)
+
     def __getitem__(self, key):
-        return self.__dict__[key]
+        return self.__dict__.__getitem__(key)
 
     def __iter__(self):
         return self.__dict__.__iter__()
