@@ -30,7 +30,7 @@ class Table(Sequence):
         self._data.__setitem__(key, value)
 
     def __delitem__(self, key):
-        pass
+        self._data.__delitem__(key)
 
     def __len__(self):
         return self._data.__len__()
