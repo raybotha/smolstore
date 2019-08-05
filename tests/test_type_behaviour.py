@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from smolstore import SmolStore
 from smolstore.document import Document
 
 
@@ -11,11 +12,10 @@ def new_dict():
 
 @pytest.fixture
 def new_doc(new_dict):
-    return Document(new_dict)
-
-
-def test_well_behaved_repr(new_doc):
-    assert eval(repr(new_doc)) == new_doc
+    store = SmolStore()
+    table = store.table()
+    table.insert(new_dict)
+    return next(table.get(table.fields.key == "value"))
 
 
 def test_equivalence(new_dict, new_doc):
@@ -32,12 +32,6 @@ def test_add_item(new_doc):
     assert new_doc == {"key": "value", "key2": "value2"}
 
 
-def test_remove_item():
-    doc = Document({"key1": "value1", "key2": "value2"})
-    del doc["key2"]
-    assert doc == {"key1": "value1"}
-
-
 def test_iterate(new_doc):
     loops = 0
     for key, value in new_doc.items():
@@ -49,7 +43,9 @@ def test_iterate(new_doc):
 
 def test_length(new_doc):
     assert len(new_doc) == 1
-    doc2 = Document({1: 1, 2: 2})
+    table = new_doc._document_table
+    table.insert({"one": 1, "two": 2})
+    doc2 = next(table.get(table.fields.one == 1))
     assert len(doc2) == 2
 
 

@@ -1,14 +1,42 @@
 # -*- coding: utf-8 -*-
-from collections.abc import MutableMapping
+from typing import Mapping
+from typing import MutableMapping
+
+from .exceptions import ReservedKey
 
 
 class Document(MutableMapping):
-    def __init__(self, *args, **kwargs):
-        self.__dict__ = {}
-        self.update(*args, **kwargs)
+    def __init__(self, _table, _document_key, mapping):
+        self.__dict__["_reserved_keys"] = {
+            "_reserved_keys",
+            "_table",
+            "_document_table",
+            "_document_key",
+        }
+        self.__dict__["_document_table"] = _table
+        self.__dict__["_document_key"] = _document_key
+        self.update(mapping)
+
+    def _set_item(self, key, value):
+        if key in self["_reserved_keys"]:
+            raise ReservedKey("'%s' is a reserved document key in smolstore" % key)
+
+        if not isinstance(value, Mapping):
+            old_value = self.get(key)
+            self["_document_table"].fields._register(
+                document_key=self["_document_key"],
+                field_name=key,
+                old_value=old_value,
+                new_value=value,
+            )
+
+        self.__dict__[key] = value
+
+    def __setattr__(self, key, value):
+        self._set_item(key, value)
 
     def __setitem__(self, key, value):
-        self.__dict__.__setitem__(key, value)
+        self._set_item(key, value)
 
     def __getitem__(self, key):
         return self.__dict__.__getitem__(key)
@@ -17,16 +45,18 @@ class Document(MutableMapping):
         self.__dict__.__delitem__(key)
 
     def __iter__(self):
-        return self.__dict__.__iter__()
+        for item in self.__dict__:
+            if item not in self["_reserved_keys"]:
+                yield item
 
     def __len__(self):
-        return self.__dict__.__len__()
+        return len(dict(self))
 
     def __repr__(self):
-        return "Document(%r)" % self.__dict__
+        return "Document(%r)" % dict(self)
 
     def __str__(self):
-        return self.__dict__.__str__()
+        return dict(self).__str__()
 
     def delete(self):
         raise NotImplementedError

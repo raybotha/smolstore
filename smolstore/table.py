@@ -3,7 +3,6 @@ from typing import Iterable
 from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
-from typing import Sequence
 from uuid import uuid4
 
 from .document import Document
@@ -13,7 +12,7 @@ from .query import ComparisonType
 from .query import Query
 
 
-class Table(Sequence):
+class Table(Iterable):
     def __init__(self, _fields: Iterable[Field] = None):
         self._data = {}
         self.fields = Fields(_fields=_fields)
@@ -28,11 +27,9 @@ class Table(Sequence):
     def _serialize(self) -> dict:
         return {"_data": self._data, "_fields": self.fields._serialize()}
 
-    def __getitem__(self, key):
-        return self._data.__getitem__(key)
-
-    def __delitem__(self, key):
-        self._data.__delitem__(key)
+    def __iter__(self):
+        for value in self._data.values():
+            yield value
 
     def __len__(self):
         return self._data.__len__()
@@ -40,9 +37,9 @@ class Table(Sequence):
     def insert(self, document):
         if not isinstance(document, Mapping):
             raise TypeError("Only dict-compatible types are supported")
-        if not isinstance(document, Document):
-            document = Document(document)
+
         key = uuid4().hex
+        document = Document(_table=self, _document_key=key, mapping=document)
         self._data.__setitem__(key, document)
 
     def upsert(self, document, field):
@@ -61,7 +58,7 @@ class Table(Sequence):
                         yield document
         else:
             for document in self._data.values():
-                if document.get(query.field) == query.value:
+                if document.get(query.field.name) == query.value:
                     yield document
 
     def delete(self, query: Query):

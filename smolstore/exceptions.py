@@ -7,3 +7,7 @@ class SmolStoreException(Exception):
 
 class UniqueViolation(SmolStoreException):
     pass
+
+
+class ReservedKey(SmolStoreException):
+    pass

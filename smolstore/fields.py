@@ -22,13 +22,22 @@ class Fields(MutableMapping):
     def _serialize(self) -> dict:
         return {field_name: field._serialize() for field_name, field in self.__dict__}
 
+    def _register(self, document_key, field_name, old_value, new_value):
+        field = self.get(field_name)
+        if field is None:
+            self[field_name] = Field(field_name)
+        else:
+            if field.indexed:
+                field._add_value(document_key, new_value)
+                field._remove_value(document_key, old_value)
+
     def __setitem__(self, key, value):
         self.__dict__.__setitem__(key, value)
 
     def __delitem__(self, key):
         self.__dict__.__delitem__(key)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Field:
         return self.__dict__.__getitem__(key)
 
     def __iter__(self):

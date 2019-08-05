@@ -44,7 +44,7 @@ def test_search_document(prefilled_table):
 def test_inequality_search_document(prefilled_table):
     table = prefilled_table
     table.insert({"username": "bob", "id": 85})
-    docs = table.get(table.fields.username != "eve")
+    docs = list(table.get(table.fields.username != "eve"))
     assert len(docs) == 1
     assert docs == [{"username": "bob", "id": 85}]
 
