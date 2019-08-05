@@ -5,5 +5,5 @@ class SmolStoreException(Exception):
     pass
 
 
-class UniqueViolation(Exception):
+class UniqueViolation(SmolStoreException):
     pass
