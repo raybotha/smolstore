@@ -60,9 +60,14 @@ class Table(Iterable):
                     if document_key not in document_keys:
                         yield document
         else:
-            for document in self._data.values():
-                if document.get(query.field.name) == query.value:
-                    yield document
+            if query.comparison_type == ComparisonType.EQUAL:
+                for document in self._data.values():
+                    if document.get(query.field.name) == query.value:
+                        yield document
+            elif query.comparison_type == ComparisonType.NOT_EQUAL:
+                for document in self._data.values():
+                    if document.get(query.field.name) != query.value:
+                        yield document
 
     def delete(self, query: Query):
         raise NotImplementedError

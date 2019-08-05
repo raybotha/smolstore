@@ -34,7 +34,7 @@ def test_list_documents(prefilled_table, basic_document):
     assert list(prefilled_table) == [basic_document]
 
 
-def test_search_document(prefilled_table):
+def test_search_document(prefilled_table, basic_document):
     table = prefilled_table
     documents = list(table.get(table.fields.username == "eve"))
     assert len(documents) == 1
@@ -68,18 +68,11 @@ def test_add_index_document(store, basic_document):
     table = store.table(fields=[Field("username", index=True)])
     assert len(table) == 0
     table.insert(basic_document)
-    assert len(table.fields.username._hash_index) == 1
+    assert len(table.fields.username._hash_index[hash(basic_document["username"])]) == 1
     assert len(table) == 1
     assert list(table.get(table.fields.username == "eve")) == [
         {"username": "eve", "id": 42, "approved": True}
     ]
-
-
-def test_add_index_after_document(prefilled_table):
-    table = prefilled_table
-    assert len(table.fields.username._hash_index) == 0
-    table.fields.username.indexed = True
-    assert len(table.fields.username._hash_index) == 1
 
 
 def test_delete_indexed_document(store, basic_document):

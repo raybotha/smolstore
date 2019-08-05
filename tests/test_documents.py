@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from smolstore import Field
 from smolstore.document import Document
 from smolstore.store import SmolStore
 
@@ -35,8 +36,8 @@ def test_modify_document(table, new_document):
 
 
 def test_modify_indexed_document(table, new_document):
+    table.fields.first_name = Field("first_name", index=True)
     table.insert(new_document)
-    table.fields.first_name.indexed = True
     doc = next(table.get(table.fields.first_name == "John"))
     doc["first_name"] = "Michael"
     assert doc == {"first_name": "Michael", "last_name": "Smith", "user_id": 10}
@@ -57,8 +58,8 @@ def test_delete_document(table, new_document):
 
 
 def test_delete_indexed_document(table, new_document):
+    table.fields.first_name = Field("first_name", index=True)
     table.insert(new_document)
-    table.fields.first_name.indexed = True
     assert len(table) == 1
     doc = next(table.get(table.fields.first_name == "John"))
     doc.delete()
