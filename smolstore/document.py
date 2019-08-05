@@ -27,3 +27,6 @@ class Document(MutableMapping):
 
     def __str__(self):
         return self.__dict__.__str__()
+
+    def delete(self):
+        raise NotImplementedError

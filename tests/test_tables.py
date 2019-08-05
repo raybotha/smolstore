@@ -37,3 +37,17 @@ def test_search_document(prefilled_table):
     documents = list(table.get(table.fields.username == "eve"))
     assert len(documents) == 1
     assert documents[0] == basic_document
+
+
+def test_delete_document(prefilled_table):
+    table = prefilled_table
+    assert len(table) == 1
+    table.delete(table.fields.id == 42)
+    assert len(table) == 0
+
+
+def test_upsert_document(prefilled_table):
+    table = prefilled_table
+    table.upsert({"username": "eve", "approved": False}, table.fields.username)
+    assert list(table) == [{"username": "eve", "id": 42, "approved": False}]
+    assert list(table.get(table.fields.approved == True)) == []

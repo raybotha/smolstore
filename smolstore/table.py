@@ -45,6 +45,9 @@ class Table(Sequence):
         key = uuid4().hex
         self._data.__setitem__(key, document)
 
+    def upsert(self, document, field):
+        raise NotImplementedError
+
     def get(self, query: Query) -> Iterator:
         if query.field.indexed:
             document_keys = query.field._get_keys(query.comparison_type, query.value)
@@ -60,3 +63,6 @@ class Table(Sequence):
             for document in self._data.values():
                 if document.get(query.field) == query.value:
                     yield document
+
+    def delete(self, query: Query):
+        raise NotImplementedError
