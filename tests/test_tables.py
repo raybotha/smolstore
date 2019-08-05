@@ -65,9 +65,10 @@ def test_upsert_document(prefilled_table):
 
 
 def test_add_index_document(store, basic_document):
-    table = store.table(fields=[Field("eve", index=True)])
+    table = store.table(fields=[Field("username", index=True)])
     assert len(table) == 0
     table.insert(basic_document)
+    assert len(table.fields.username._hash_index) == 1
     assert len(table) == 1
     assert list(table.get(table.fields.username == "eve")) == [
         {"username": "eve", "id": 42, "approved": True}
