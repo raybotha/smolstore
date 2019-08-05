@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 
-from .document import Document
 from .query import ComparisonType
 from .query import Query
 
