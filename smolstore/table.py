@@ -34,6 +34,9 @@ class Table(Iterable):
     def __len__(self):
         return self._data.__len__()
 
+    def __repr__(self):
+        return repr(list(self._data.values()))
+
     def insert(self, document):
         if not isinstance(document, Mapping):
             raise TypeError("Only dict-compatible types are supported")

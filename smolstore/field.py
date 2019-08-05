@@ -26,7 +26,7 @@ class Field:
 
     def _add_value(self, document_key, value):
         hash_value = hash(value)
-        if self.unique and len(self._hash_index[value]) > 0:
+        if self.unique and len(self._hash_index[hash_value]) > 0:
             raise UniqueViolation
         self._hash_index[hash_value].add(document_key)
 

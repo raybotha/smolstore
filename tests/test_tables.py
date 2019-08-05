@@ -92,7 +92,7 @@ def test_delete_indexed_document(store, basic_document):
 
 
 def test_violate_unique_constraint(store, basic_document):
-    table = store.table(fields=[Field("eve", unique=True)])
+    table = store.table(fields=[Field("username", unique=True)])
     table.insert(basic_document)
     assert len(table) == 1
     with pytest.raises(UniqueViolation):
