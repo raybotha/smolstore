@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from typing import Iterable
 from typing import Iterator
+from typing import Mapping
 from typing import MutableMapping
 from typing import Sequence
 from uuid import uuid4
 
+from .document import Document
 from .field import Field
 from .fields import Fields
 from .query import ComparisonType
@@ -36,8 +38,10 @@ class Table(Sequence):
         return self._data.__len__()
 
     def insert(self, document):
-        if not isinstance(document, MutableMapping):
+        if not isinstance(document, Mapping):
             raise TypeError("Only dict-compatible types are supported")
+        if not isinstance(document, Document):
+            document = Document(document)
         key = uuid4().hex
         self._data.__setitem__(key, document)
 
