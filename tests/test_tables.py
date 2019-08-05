@@ -3,6 +3,7 @@ import pytest
 
 from smolstore import Field
 from smolstore import SmolStore
+from smolstore import UniqueViolation
 
 
 @pytest.fixture
@@ -59,6 +60,27 @@ def test_add_index_document(store, basic_document):
     table = store.table(fields=[Field("eve", index=True)])
     assert len(table) == 0
     table.insert(basic_document)
+    assert len(table) == 1
+    assert list(table.get(table.fields.username == "eve")) == [
+        {"username": "eve", "id": 42, "approved": True}
+    ]
+
+
+def test_delete_indexed_document(store, basic_document):
+    table = store.table(fields=[Field("eve", index=True)])
+    table.insert(basic_document)
+    assert len(table) == 1
+    table.delete(table.fields.id == 42)
+    assert len(table) == 0
+    assert list(table.get(table.fields.username == "eve")) == []
+
+
+def test_violate_unique_constraint(store, basic_document):
+    table = store.table(fields=[Field("eve", unique=True)])
+    table.insert(basic_document)
+    assert len(table) == 1
+    with pytest.raises(UniqueViolation):
+        table.insert({"username": "eve", "id": 120, "approved": False})
     assert len(table) == 1
     assert list(table.get(table.fields.username == "eve")) == [
         {"username": "eve", "id": 42, "approved": True}
