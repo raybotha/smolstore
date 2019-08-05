@@ -31,6 +31,11 @@ class Fields(MutableMapping):
                 field._add_value(document_key, new_value)
                 field._remove_value(document_key, old_value)
 
+    def _unregister(self, document_key, field_name, value):
+        field = self.get(field_name)
+        if field and field.indexed:
+            field._remove_value(document_key, value)
+
     def __setitem__(self, key, value):
         self.__dict__.__setitem__(key, value)
 

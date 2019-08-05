@@ -11,3 +11,7 @@ class UniqueViolation(SmolStoreException):
 
 class ReservedKey(SmolStoreException):
     pass
+
+
+class MissingField(SmolStoreException):
+    pass

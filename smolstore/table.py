@@ -6,6 +6,7 @@ from typing import MutableMapping
 from uuid import uuid4
 
 from .document import Document
+from .exceptions import MissingField
 from .field import Field
 from .fields import Fields
 from .query import ComparisonType
@@ -45,29 +46,53 @@ class Table(Iterable):
         document = Document(_table=self, _document_key=key, mapping=document)
         self._data.__setitem__(key, document)
 
-    def upsert(self, document, field):
-        raise NotImplementedError
+    def upsert(self, document, field: Field, multiple=False):
+        try:
+            match_value = document[field.name]
+        except KeyError:
+            raise MissingField("Specified field does not exist in passed document")
 
-    def get(self, query: Query) -> Iterator:
+        for key in self._get_keys(field == match_value):
+            self._data[key].update(document)
+            if multiple is False:
+                break
+
+    def _get_keys(self, query: Query) -> Iterator:
         if query.field.indexed:
             document_keys = query.field._get_keys(query.comparison_type, query.value)
 
             if query.comparison_type == ComparisonType.EQUAL:
                 for key in document_keys:
-                    yield self._data[key]
+                    yield key
             elif query.comparison_type == ComparisonType.NOT_EQUAL:
-                for document_key, document in self._data.items():
-                    if document_key not in document_keys:
-                        yield document
+                for key, document in self._data.items():
+                    if key not in document_keys:
+                        yield key
         else:
             if query.comparison_type == ComparisonType.EQUAL:
-                for document in self._data.values():
+                for key, document in self._data.items():
                     if document.get(query.field.name) == query.value:
-                        yield document
+                        yield key
             elif query.comparison_type == ComparisonType.NOT_EQUAL:
-                for document in self._data.values():
+                for key, document in self._data.items():
                     if document.get(query.field.name) != query.value:
-                        yield document
+                        yield key
+
+    def get(self, query: Query) -> Iterator:
+        for key in self._get_keys(query):
+            yield self._data[key]
+
+    def first(self, query: Query) -> Iterator:
+        for key in self._get_keys(query):
+            yield self._data[key]
+            break
+        return None
+
+    def _delete_document(self, document_key):
+        self._data[document_key].clear()
+        del self._data[document_key]
 
     def delete(self, query: Query):
-        raise NotImplementedError
+        keys = list(self._get_keys(query))
+        for key in keys:
+            self._delete_document(key)

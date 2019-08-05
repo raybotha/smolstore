@@ -32,8 +32,22 @@ class Document(MutableMapping):
 
         self.__dict__[key] = value
 
+    def _del_item(self, key):
+        print("deleted")
+        if key in self["_reserved_keys"]:
+            raise ReservedKey("'%s' is a reserved document key in smolstore" % key)
+
+        self["_document_table"].fields._unregister(
+            document_key=self["_document_key"], field_name=key, value=self.get(key)
+        )
+
+        del self.__dict__[key]
+
     def __setattr__(self, key, value):
         self._set_item(key, value)
+
+    def __delattr__(self, item):
+        self._del_item(item)
 
     def __setitem__(self, key, value):
         self._set_item(key, value)
@@ -42,7 +56,7 @@ class Document(MutableMapping):
         return self.__dict__.__getitem__(key)
 
     def __delitem__(self, key):
-        self.__dict__.__delitem__(key)
+        self._del_item(key)
 
     def __iter__(self):
         for item in self.__dict__:
@@ -59,4 +73,4 @@ class Document(MutableMapping):
         return dict(self).__str__()
 
     def delete(self):
-        raise NotImplementedError
+        self["_document_table"]._delete_document(self["_document_key"])
