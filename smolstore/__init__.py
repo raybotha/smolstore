@@ -4,4 +4,4 @@ from .field import Field
 from .store import SmolStore
 
 __version__ = "0.1.0"
-__all__ = (SmolStore,)
+__all__ = (SmolStore, Field, UniqueViolation)
