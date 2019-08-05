@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from smolstore import Field
 from smolstore import SmolStore
 
 
@@ -44,6 +45,7 @@ def test_delete_document(prefilled_table):
     assert len(table) == 1
     table.delete(table.fields.id == 42)
     assert len(table) == 0
+    assert list(table.get(table.fields.username == "eve")) == []
 
 
 def test_upsert_document(prefilled_table):
@@ -51,3 +53,13 @@ def test_upsert_document(prefilled_table):
     table.upsert({"username": "eve", "approved": False}, table.fields.username)
     assert list(table) == [{"username": "eve", "id": 42, "approved": False}]
     assert list(table.get(table.fields.approved == True)) == []
+
+
+def test_add_index_document(store, basic_document):
+    table = store.table(fields=[Field("eve", index=True)])
+    assert len(table) == 0
+    table.insert(basic_document)
+    assert len(table) == 1
+    assert list(table.get(table.fields.username == "eve")) == [
+        {"username": "eve", "id": 42, "approved": True}
+    ]
