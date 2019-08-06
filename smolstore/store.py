@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from typing import Iterable
+from typing import Iterator
 from typing import MutableMapping
 
 from .field import Field
+from .query import Query
 from .serializers import JsonSerializer
 from .table import Table
 
 
-class SmolStore:
+class SmolStore(Iterable):
     def __init__(self, filename=None, serializer=JsonSerializer):
         self._filename = filename
         self._serializer = serializer
@@ -40,6 +42,34 @@ class SmolStore:
             self._tables[table_name] = table
             return table
 
+    def __iter__(self):
+        return self.table().__iter__()
+
+    def __len__(self):
+        return self.table().__len__()
+
+    @property
+    def fields(self):
+        return self.table().fields
+
     def save(self):
         if self._filename:
             self._serializer.dump(self._filename, self._serialize())
+
+    def delete_table(self, table_name: str):
+        del self._tables[table_name]
+
+    def insert(self, document):
+        self.table().insert(document)
+
+    def upsert(self, document, query, multiple=False):
+        self.table().upsert(document, query, multiple)
+
+    def get(self, query: Query) -> Iterator:
+        return self.table().get(query)
+
+    def first(self, query: Query):
+        return self.table().first(query)
+
+    def delete(self, query: Query):
+        self.table().delete(query)

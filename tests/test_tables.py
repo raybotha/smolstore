@@ -18,9 +18,8 @@ def basic_document():
 
 @pytest.fixture
 def prefilled_table(store, basic_document):
-    table = store.table()
-    table.insert(basic_document)
-    return table
+    store.insert(basic_document)
+    return store
 
 
 def test_insert_document(store, basic_document):
