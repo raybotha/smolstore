@@ -57,7 +57,10 @@ class SmolStore(Iterable):
             self._serializer.dump(self._filename, self._serialize())
 
     def delete_table(self, table_name: str):
-        del self._tables[table_name]
+        try:
+            del self._tables[table_name]
+        except KeyError:
+            pass
 
     def insert(self, document):
         self.table().insert(document)

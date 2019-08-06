@@ -30,3 +30,8 @@ def test_delete_table():
     assert len(store._tables) == 2
     store.delete_table("two")
     assert len(store._tables) == 1
+
+
+def test_delete_nonexistent_table_ignored():
+    store = SmolStore()
+    store.delete_table("non-existent")
