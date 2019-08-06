@@ -9,7 +9,6 @@ class Document(MutableMapping):
     def __init__(self, _table, _document_key, mapping):
         self.__dict__["_reserved_keys"] = {
             "_reserved_keys",
-            "_table",
             "_document_table",
             "_document_key",
         }

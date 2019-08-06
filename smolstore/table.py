@@ -6,7 +6,6 @@ from typing import MutableMapping
 from uuid import uuid4
 
 from .document import Document
-from .exceptions import MissingField
 from .field import Field
 from .fields import Fields
 from .query import ComparisonType
@@ -21,12 +20,25 @@ class Table(Iterable):
     @classmethod
     def _deserialize(cls, _data: MutableMapping):
         table = cls()
-        table._data = _data["_data"]
         table.fields = Fields._deserialize(_data["_fields"])
+        table._data = {
+            key: Document(
+                _table=table,
+                _document_key=value["_document_key"],
+                mapping=value["_data"],
+            )
+            for key, value in _data["_data"].items()
+        }
         return table
 
     def _serialize(self) -> dict:
-        return {"_data": self._data, "_fields": self.fields._serialize()}
+        return {
+            "_data": {
+                key: {"_document_key": document._document_key, "_data": dict(document)}
+                for key, document in self._data.items()
+            },
+            "_fields": self.fields._serialize(),
+        }
 
     def __iter__(self):
         for value in self._data.values():
@@ -36,7 +48,7 @@ class Table(Iterable):
         return self._data.__len__()
 
     def __repr__(self):
-        return repr(list(self._data.values()))
+        return "Table(%r)" % list(self._data.values())
 
     def insert(self, document):
         if not isinstance(document, Mapping):
@@ -46,27 +58,21 @@ class Table(Iterable):
         document = Document(_table=self, _document_key=key, mapping=document)
         self._data.__setitem__(key, document)
 
-    def upsert(self, document, field: Field, multiple=False):
-        try:
-            match_value = document[field.name]
-        except KeyError:
-            raise MissingField("Specified field does not exist in passed document")
-
-        for key in self._get_keys(field == match_value):
+    def upsert(self, document, query, multiple=False):
+        for key in self._get_keys(query):
             self._data[key].update(document)
             if multiple is False:
                 break
 
     def _get_keys(self, query: Query) -> Iterator:
         if query.field.indexed:
-            document_keys = query.field._get_keys(query.comparison_type, query.value)
-
             if query.comparison_type == ComparisonType.EQUAL:
-                for key in document_keys:
+                for key in query.field._get_keys(ComparisonType.EQUAL, query.value):
                     yield key
             elif query.comparison_type == ComparisonType.NOT_EQUAL:
-                for key, document in self._data.items():
-                    if key not in document_keys:
+                equal_keys = query.field._get_keys(ComparisonType.EQUAL, query.value)
+                for key in self._data.keys():
+                    if key not in equal_keys:
                         yield key
         else:
             if query.comparison_type == ComparisonType.EQUAL:
@@ -82,10 +88,9 @@ class Table(Iterable):
         for key in self._get_keys(query):
             yield self._data[key]
 
-    def first(self, query: Query) -> Iterator:
+    def first(self, query: Query):
         for key in self._get_keys(query):
-            yield self._data[key]
-            break
+            return self._data[key]
         return None
 
     def _delete_document(self, document_key):

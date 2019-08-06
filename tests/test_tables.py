@@ -59,7 +59,7 @@ def test_delete_document(prefilled_table):
 
 def test_upsert_document(prefilled_table):
     table = prefilled_table
-    table.upsert({"username": "eve", "approved": False}, table.fields.username)
+    table.upsert({"username": "eve", "approved": False}, table.fields.username == "eve")
     assert list(table) == [{"username": "eve", "id": 42, "approved": False}]
     assert list(table.get(table.fields.approved == True)) == []
 
@@ -72,6 +72,17 @@ def test_add_index_document(store, basic_document):
     assert len(table) == 1
     assert list(table.get(table.fields.username == "eve")) == [
         {"username": "eve", "id": 42, "approved": True}
+    ]
+
+
+def test_inequality_search_indexed_document(store, basic_document):
+    table = store.table(fields=[Field("username", index=True)])
+    table.insert(basic_document)
+    basic_document.update({"username": "bob"})
+    table.insert(basic_document)
+    assert len(table) == 2
+    assert list(table.get(table.fields.username != "eve")) == [
+        {"username": "bob", "id": 42, "approved": True}
     ]
 
 
@@ -116,3 +127,12 @@ def test_fields_added_non_unique(prefilled_table):
     assert prefilled_table.fields.username.unique is False
     assert prefilled_table.fields.id.unique is False
     assert prefilled_table.fields.approved.unique is False
+
+
+def test_raise_on_insert_non_mapping(prefilled_table):
+    with pytest.raises(TypeError):
+        prefilled_table.insert(["Hey there pal"])
+
+
+def test_return_none_on_empty_first_query(prefilled_table):
+    assert prefilled_table.first(prefilled_table.fields.username == "steve") is None

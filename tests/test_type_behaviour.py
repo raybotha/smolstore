@@ -2,7 +2,6 @@
 import pytest
 
 from smolstore import SmolStore
-from smolstore.document import Document
 
 
 @pytest.fixture
@@ -15,7 +14,29 @@ def new_doc(new_dict):
     store = SmolStore()
     table = store.table()
     table.insert(new_dict)
-    return next(table.get(table.fields.key == "value"))
+    return table.first(table.fields.key == "value")
+
+
+def test_document_repr(new_doc, new_dict):
+    assert repr(new_doc) == f"Document({new_dict})"
+
+
+def test_table_repr(new_doc, new_dict):
+    assert repr(new_doc._document_table) == f"Table([Document({new_dict})])"
+
+
+def test_field_repr(new_doc):
+    assert (
+        repr(new_doc._document_table.fields.key)
+        == "Field('key', index=False, unique=False)"
+    )
+
+
+def test_fields_repr(new_doc):
+    assert (
+        repr(new_doc._document_table.fields)
+        == "Fields([Field('key', index=False, unique=False)])"
+    )
 
 
 def test_equivalence(new_dict, new_doc):

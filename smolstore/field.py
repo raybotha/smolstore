@@ -38,8 +38,6 @@ class Field:
         if comparison_type == ComparisonType.EQUAL:
             hash_value = hash(value)
             return self._hash_index[hash_value]
-        else:
-            raise NotImplementedError
 
     def __eq__(self, other):
         return Query(field=self, comparison_type=ComparisonType.EQUAL, value=other)
@@ -48,4 +46,4 @@ class Field:
         return Query(field=self, comparison_type=ComparisonType.NOT_EQUAL, value=other)
 
     def __repr__(self):
-        return "Field(%s, index=%s, unique=%s)" % (self.name, self.indexed, self.unique)
+        return "Field(%r, index=%r, unique=%r)" % (self.name, self.indexed, self.unique)
