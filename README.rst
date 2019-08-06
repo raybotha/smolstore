@@ -1,8 +1,15 @@
 smolstore
 =========
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 .. image:: https://img.shields.io/azure-devops/build/raybotha/efd73a71-dda0-4c74-a6f2-eec4944bc548/1/master
+    :target: https://dev.azure.com/raybotha/smolstore/_build?definitionId=1
+
 .. image:: https://img.shields.io/azure-devops/coverage/raybotha/smolstore/1/master
+    :target: https://dev.azure.com/raybotha/smolstore/_build?definitionId=1
+
 
 Smolstore is a simple in-memory document store designed for small
 applications and scripts, dealing with small data with high
