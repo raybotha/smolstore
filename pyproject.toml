@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "smolstore"
-version = "0.1.1a"
+version = "0.2.0a"
 description = "A simple in-memory Python document store"
 authors = ["Raymond Botha <botha@riseup.net>"]
 license = "LGPL-3.0+"
